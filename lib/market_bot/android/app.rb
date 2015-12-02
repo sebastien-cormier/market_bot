@@ -184,36 +184,6 @@ module MarketBot
         "https://play.google.com/store/apps/details?id=#{@app_id}&hl=#{lang}"
       end
 
-      def update
-        resp = Typhoeus::Request.get(market_url, @request_opts)
-        result = handle_response(resp)
-        update_callback(result)
-
-        self
-      end
-
-      def enqueue_update(&block)
-        @callback = block
-        @error = nil
-
-        request = Typhoeus::Request.new(market_url, @request_opts)
-
-        request.on_complete do |response|
-          result = nil
-
-          begin
-            result = handle_response(response)
-          rescue Exception => e
-            @error = e
-          end
-
-          update_callback(result)
-        end
-
-        hydra.queue(request)
-
-        self
-      end
 
     private
 

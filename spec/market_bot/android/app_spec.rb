@@ -44,18 +44,6 @@ def check_getters(app)
 end
 
 describe 'App' do
-  context 'Construction' do
-    it 'should copy the app_id param' do
-      app = App.new(test_id)
-      app.app_id.should == test_id
-    end
-
-    it 'should copy optional params' do
-      hydra = Typhoeus::Hydra.new
-      app = App.new(test_id, :hydra => hydra)
-      app.hydra.should equal(hydra)
-    end
-  end
 
   it 'should generate market URLs' do
     App.new(test_id).market_url.should == "https://play.google.com/store/apps/details?id=#{test_id}&hl=en"
@@ -178,80 +166,6 @@ describe 'App' do
       result[:reviews][2][:review_score].should  == 5
     end
 
-  end
-
-  context 'Updating' do
-    context 'Quick API' do
-      app = App.new(test_id)
-
-      response = Typhoeus::Response.new(:code => 200, :headers => '', :body => test_src_data)
-      Typhoeus.stub(app.market_url).and_return(response)
-
-      app.update
-      check_getters(app)
-    end
-
-    context "Quick API not found" do
-      let(:app) { App.new(test_id) }
-
-      before do
-        response = Typhoeus::Response.new(:code => 404)
-        Typhoeus.stub(app.market_url).and_return(response)
-      end
-
-      it "raises a ResponseError" do
-        expect {
-          app.update
-        }.to raise_error(MarketBot::ResponseError)
-      end
-    end
-
-    context 'Batch API' do
-      hydra = Typhoeus::Hydra.new
-      app = App.new(test_id, :hydra => hydra)
-
-      response = Typhoeus::Response.new(:code => 200, :headers => '', :body => test_src_data)
-      Typhoeus.stub(app.market_url).and_return(response)
-
-      callback_flag = false
-
-      app.enqueue_update do |a|
-        callback_flag = true
-      end
-
-      hydra.run
-
-      it 'should call the callback' do
-        callback_flag.should be(true)
-      end
-
-      check_getters(app)
-    end
-
-    context 'Batch API parser error' do
-      hydra = Typhoeus::Hydra.new
-      app = App.new(test_id, :hydra => hydra)
-
-      response = Typhoeus::Response.new(:code => 200, :headers => '', :body => 'some broken app page')
-      Typhoeus.stub(app.market_url).and_return(response)
-
-      callback_flag = false
-      error = nil
-
-      app.enqueue_update do |a|
-        callback_flag = true
-        error = a.error
-      end
-
-      hydra.run
-
-      it 'should call the callback' do
-        callback_flag.should be(true)
-      end
-
-      it 'should set error to the exception' do
-        error.should be_a(Exception)
-      end
-    end
+    
   end
 end

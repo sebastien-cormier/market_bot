@@ -1,6 +1,5 @@
 require 'uri'
 
-require 'typhoeus'
 require 'nokogiri'
 
 require 'market_bot/version'
@@ -15,7 +14,7 @@ require 'market_bot/movie/search_query'
 
 module MarketBot
   def self.hydra
-    @hydra ||= Typhoeus::Hydra.new(:max_concurrency => 5)
+    
   end
 end
 
